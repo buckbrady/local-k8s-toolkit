@@ -11,18 +11,27 @@ install helm-diff with `helm plugin install https://github.com/databus23/helm-di
 
 run `bash ./install.sh`
 
-## Ingress
+## Included Tools
 
-Ingress with Cert Manager are setup so that you can have https over any `*.localhost` domain i.e. `https://test.localhost`
+- Ingress Nginx
+- CertManager
+- CertManager Trust Manager
+- Crunchydata Postgres Operator
+- Opstree Container Kit Redis Operator
+- Opstree Container Kit MongoDB Operator
+- Minio Standalone w/ Console
+- Selfsigned CA Cluster Issuer
 
-## Cert Manager
+## Operator Resources
 
-## Operators
+Examples of deploying resources via the included operators are located in the `examples` directory
 
-This toolkit installs the following operators
+## Notes
 
-### Crunchydata Postgres
+- Using the `*.localhost` allows you to use domains with ingress without needing to configure any DNS
 
-### MongoDB Operator
+- All subdomains of `.localhost` will automaticlly resolved to `127.0.0.1` for IPv4 and `::1` for IPv6
 
-### Redis Operator
+- You can add additonal manifests to the `manifests/` directory as the entire directory except `manifests/certs` has been added to gitignore
+
+- You can add additonal helmfiles to the `helmfile.d/` directory as the entire directory except `helmfile.d/00-base-helmfile.yaml` has been added to gitignore
