@@ -1,0 +1,2 @@
+helmfile.d/*
+!helmfile.d/00-base-helmfile.yaml

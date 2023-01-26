@@ -1,0 +1,95 @@
+repositories:
+  - name: ingress-nginx
+    url: https://kubernetes.github.io/ingress-nginx
+  - name: jetstack
+    url: https://charts.jetstack.io
+  - name: ot-helm 
+    url: https://ot-container-kit.github.io/helm-charts/
+  - name: crunchydata
+    url: https://raw.githubusercontent.com/voidrot/postgres-operator/main/charts/
+  - name: minio
+    url: https://charts.min.io/
+
+helmDefaults:
+  kubeContext: kind-kind
+  createNamespace: true
+  historyMax: 3
+
+releases:
+  - name: ingress
+    namespace: ingress-nginx
+    chart: ingress-nginx/ingress-nginx
+    values:
+      - controller:
+          resources: {}
+          hostPort:
+            enabled: true
+          service:
+            type: NodePort
+            nodePorts:
+              http: 32080
+              https: 32443
+          watchIngressWithoutClass: true
+  - name: cert-manager
+    namespace: cert-manager
+    chart: jetstack/cert-manager
+    values:
+      - installCRDs: true
+  - name: trust-manager
+    namespace: cert-manager
+    chart: jetstack/trust-manager
+  - name: crunchydata-operator
+    namespace: operators
+    chart: crunchydata/pgo
+    version: 5.3.0
+  - name: monogo-operator
+    namespace: operators
+    chart: ot-helm/mongodb-operator
+    values:
+      - resources:
+          limits:
+            cpu: 300m
+            memory: 800Mi
+          requests: {}
+  - name: redis-operator
+    namespace: operators
+    chart: ot-helm/redis-operator
+    values: 
+      - resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests: {}
+  - name: minio
+    namespace: minio
+    chart: minio/minio
+    values:
+      - mode: standalone
+      - rootUser: development
+      - rootPassword: development
+      - replicas: 1
+      - persistence:
+          size: 10Gi
+      - ingress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            cert-manager.io/issuer: "ca-issuer"
+          tls:
+            - hosts:
+                - minio.localhost
+              secretName: minio-tls
+          hosts: 
+            - minio.localhost
+      - consoleIngress:
+          enabled: true
+          ingressClassName: nginx
+          annotations:
+            cert-manager.io/issuer: "ca-issuer"
+          tls:
+            - hosts:
+                - minio-console.localhost
+              secretName: minio-console-tls
+          hosts: 
+            - minio-console.localhost
+      - resources: {}
